@@ -2,9 +2,11 @@ package de.seuhd.campuscoffee.api.controller;
 
 import de.seuhd.campuscoffee.api.dtos.ReviewDto;
 import de.seuhd.campuscoffee.api.mapper.DtoMapper;
+import de.seuhd.campuscoffee.api.mapper.ReviewDtoMapper;
 import de.seuhd.campuscoffee.api.openapi.CrudOperation;
 import de.seuhd.campuscoffee.domain.model.objects.Review;
 import de.seuhd.campuscoffee.domain.ports.api.CrudService;
+import de.seuhd.campuscoffee.domain.ports.api.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,15 +32,17 @@ import static de.seuhd.campuscoffee.api.openapi.Resource.REVIEW;
 public class ReviewController extends CrudController<Review, ReviewDto, Long> {
 
     // TODO: Correctly implement the service() and mapper() methods. Note the IntelliJ warning resulting from the @NonNull annotation.
+    private final ReviewService reviewService;
+    private final ReviewDtoMapper reviewDtoMapper;
 
     @Override
     protected @NonNull CrudService<Review, Long> service() {
-        return null;
+        return reviewService;
     }
 
     @Override
     protected @NonNull DtoMapper<Review, ReviewDto> mapper() {
-        return null;
+        return reviewDtoMapper;
     }
 
     @Operation
