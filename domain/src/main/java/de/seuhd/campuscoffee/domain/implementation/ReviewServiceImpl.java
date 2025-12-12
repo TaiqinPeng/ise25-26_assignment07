@@ -46,6 +46,34 @@ public class ReviewServiceImpl extends CrudServiceImpl<Review, Long> implements 
     @Transactional
     public @NonNull Review upsert(@NonNull Review review) {
         // TODO: Implement the missing business logic here
+        // 1) validate that referenced entities exist
+        var posId = review.pos().getId();
+        var authorId = review.author().getId();
+
+        var pos = posDataService.getById(posId);
+        var author = userDataService.getById(authorId);
+
+        // 2) prevent client from manipulating approval state via upsert
+        Integer approvalCount;
+        Boolean approved;
+
+        if (review.getId() == null) {
+            // creating a new review
+            approvalCount = 0;
+            approved = false;
+        } else {
+            // updating an existing review -> keep approval fields from DB
+            var existing = reviewDataService.getById(review.getId());
+            approvalCount = existing.approvalCount();
+            approved = existing.approved();
+        }
+
+        var sanitized = review.toBuilder()
+                .pos(pos)
+                .author(author)
+                .approvalCount(approvalCount)
+                .approved(approved)
+                .build();
 
         return super.upsert(review);
     }
@@ -64,20 +92,31 @@ public class ReviewServiceImpl extends CrudServiceImpl<Review, Long> implements 
 
         // validate that the user exists
         // TODO: Implement the required business logic here
+        userDataService.getById(userId);
 
         // validate that the review exists
         // TODO: Implement the required business logic here
+        Review existingReview = reviewDataService.getById(review.getId());
 
         // a user cannot approve their own review
         // TODO: Implement the required business logic here
+        if (userId.equals(existingReview.author().id())) {
+            throw new IllegalArgumentException("User cannot approve their own review");
+        }
 
         // increment approval count
         // TODO: Implement the required business logic here
+        Review updatedReview = existingReview.toBuilder()
+                .approvalCount(existingReview.approvalCount() + 1)
+                .build();
 
         // update approval status to determine if the review now reaches the approval quorum
         // TODO: Implement the required business logic here
+        updatedReview = updatedReview.toBuilder()
+                .approved(isApproved(updatedReview))
+                .build();
 
-        return reviewDataService.upsert(review);
+        return reviewDataService.upsert(updatedReview);
     }
 
     /**

@@ -1,8 +1,10 @@
 package de.seuhd.campuscoffee.domain.model.objects;
 
 import lombok.Builder;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import lombok.NonNull;
+
+
+import jakarta.annotation.Nullable;
 
 /**
  * Domain record that stores a review for a point of sale.
@@ -12,11 +14,17 @@ import org.jspecify.annotations.Nullable;
 public record Review(
         @Nullable Long id, // null when the review has not been created yet
         //TODO: Implement review domain model.
-        @NonNull Integer approvalCount, // is updated by the domain module
-        @NonNull Boolean approved // is determined by the domain module
+        @NonNull Pos pos,
+        @NonNull User author,
+        @NonNull String review,
+        @NonNull Integer approvalCount,
+        @NonNull Boolean approved     // is updated by the domain module
 ) implements DomainModel<Long> {
     @Override
     public Long getId() {
         return id;
+    }
+    public boolean isApproved(int requiredApprovals) {
+        return approvalCount >= requiredApprovals;
     }
 }
